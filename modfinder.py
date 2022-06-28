@@ -106,7 +106,7 @@ def main():
 			colorerer = f'\033[38;2;{red};{green};{blue}m'
 			return faded, colorerer
 
-		menu = """
+		menu = f"""
  /$$      /$$           /$$                                            
 | $$  /$ | $$          | $$                                            
 | $$ /$$$| $$  /$$$$$$ | $$  /$$$$$$$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$ 
@@ -116,30 +116,152 @@ def main():
 | $$/   \\  $$|  $$$$$$$| $$|  $$$$$$$|  $$$$$$/| $$ | $$ | $$|  $$$$$$$
 |__/     \\__/ \\_______/|__/ \\_______/ \\______/ |__/ |__/ |__/ \\_______/
 -------------------------------------------------------------------------------
-made by frankielivada22
+ISMF - made by frankielivada22
+
+Steam Path: {steam_path}
+ModIO Path: {steam_path}steamapps\\common\\sandstorm\\Insurgency\\Mods\\modio
+
+[1] List all mods     
+[2] Find a mod        
+[3] Delete all mods   
+[4] Show config file content 
+
 		"""
 		faded_text, colorerer = redgreenblue(menu)
 		print(faded_text)
 
-		ask = input('Enter name of the mod: ')
-		print("")
-
-		# r=root, d=directories, f = files
-		for r, d, f in os.walk(incergency_mods_path):
-			for file in f:
-				if file.endswith(".json"):
-					file_name = os.path.join(r, file)
-					with open(file_name, 'r') as f:
-						file_lines = f.read()
-					if ask in file_lines:
-						print(f"{ask} was found inside")
-						print(f"Path: {file_name.rstrip('State.json')}")
+		ask = input('Enter option: ')
+		if ask == "1":
+			print("")
+			string = ''
+			# r=root, d=directories, f = files
+			for r, d, f in os.walk(incergency_mods_path):
+				for file in f:
+					if file.endswith(".json"):
+						file_name = os.path.join(r, file)
 						file_number = d[0]
-						print(f"Mod number: {file_number}\n")
-					else:
-						pass
-		print("")
-		os.system('pause')
+						#print(file_name)
+
+						with open(file_name, "rb") as read_file:
+							#print(read_file)
+							json_object = json.load(read_file)
+						anothervalue = f"""
+(
+	Mod Name: {json_object['name']}
+	Path: {file_name.rstrip('State.json')}
+	Mod Number: {file_number}
+)
+						"""
+						string = string + anothervalue
+						print(anothervalue)
+
+			print("")
+			while True:
+				ask = input('Would you like to save this? (y / n): ')
+				if ask == "y":
+					with open('ModOut.txt', 'w', encoding='utf-8') as f:
+						f.write(string)
+					print("Saved to ModOut.txt")
+					time.sleep(1)
+					break
+				elif ask == "n":
+					break
+				else:
+					pass
+			os.system('pause')
+		elif ask == "2":
+			ask = input('Enter the mod number: ')
+			print("")
+			# r=root, d=directories, f = files
+			for r, d, f in os.walk(incergency_mods_path):
+				for file in f:
+					if file.endswith(".json"):
+						file_name = os.path.join(r, file)
+						file_number = d[0]
+						#print(file_name)
+
+						with open(file_name, "rb") as read_file:
+							#print(read_file)
+							json_object = json.load(read_file)
+							mod_name = json_object['name']
+
+						if ask.lower() == mod_name.lower():
+							print("Found")
+							anothervalue = f"""
+(
+	Mod Name: {mod_name}
+	Path: {file_name.rstrip('State.json')}
+	Mod Number: {file_number}
+)
+							"""
+							print(anothervalue)
+						else:
+							pass
+
+			print("")
+			os.system('pause')
+		elif ask == "3":
+			while True:
+				ask = input('Are you sure (y / n)?: ')
+				if ask == 'y':
+					for r, d, f in os.walk(incergency_mods_path):
+						for file in f:
+							if file.endswith(".json"):
+								file_name = os.path.join(r, file)
+								with open(file_name, "rb") as read_file:
+									json_object = json.load(read_file)
+								print(f'Deleting: {json_object["name"]}')
+								os.system(f'del {file_name.rstrip("State.json")}')
+
+					print("Deleted all mods...")
+					os.system('pause')
+					break
+				elif ask == 'n':
+					break
+				else:
+					pass
+		elif ask == "4":
+			mod_list = []
+			for r, d, f in os.walk(incergency_mods_path):
+				for file in f:
+					if file.endswith(".json"):
+						file_name = os.path.join(r, file)
+						with open(file_name, "rb") as read_file:
+							json_object = json.load(read_file)
+						mod_list.append(json_object["name"])
+			c = 0
+			for mod in mod_list:
+				print(f'[{c}]: {mod}')
+				c += 1
+			while True:
+				ask = input('Number of mod: ')
+				if int(ask) > len(mod_list):
+					print("Invalid mod selected...")
+				elif int(ask) < -1:
+					print("Invalid mod selected...")
+				else:
+					c = 0
+					done = False
+					for r, d, f in os.walk(incergency_mods_path):
+						if done == True:
+							break
+						for file in f:
+							if done == True:
+								break
+							if file.endswith(".json"):
+								file_name = os.path.join(r, file)
+								if c == int(ask):
+									with open(file_name, "rb") as read_file:
+										json_object = json.load(read_file)
+									print(json_object)
+									done = True
+									break
+								else:
+									c += 1
+		else:
+			print("Invalid input.")
+			time.sleep(1)
+		
 		clear()
 				
 
